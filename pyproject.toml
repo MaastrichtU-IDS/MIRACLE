@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+version = "0.0.1"
+name = "prodigy_wspace"
+description = "Annotation with Prodigy"
+readme = "README.md"
+requires-python = ">=3.7"
+keywords = ["Prodigy"]
+license = {file = "LICENSE.txt"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "requests",
+    "pandas"
+]
+
+
+[project.optional-dependencies]
+test = [
+    "pre-commit",
+]
+
+[tool.hatch.envs.default]
+features = [
+    "test",
+]
+post-install-commands = [
+    "pre-commit install",
+]
+
+[tool.hatch.envs.default.scripts]
+fmt = [
+    "pre-commit run --all --all-files",
+]
