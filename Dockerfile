@@ -1,6 +1,8 @@
 # You may need to specify the --platform depending on cloud provider
 FROM python:3.9
 
+WORKDIR /app
+
 # Copy requirements first
 COPY requirements.txt .
 
@@ -26,4 +28,4 @@ ENV PRODIGY_BASIC_AUTH_USER "prodigy-user"
 # Expose the port number appropriate for cloud vendor
 EXPOSE 8080
 
-CMD ["bash", "run.sh"]
+CMD [ "/app/start.sh" ]
