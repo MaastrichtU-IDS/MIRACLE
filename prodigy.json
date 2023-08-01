@@ -5,7 +5,7 @@
     "batch_size": 10,
     "history_size": 10,
     "port": 8080,
-    "host": "172.22.181.66",
+    "host": "localhost",
     "cors": true,
     "db": "sqlite",
     "db_settings": {},

@@ -3,11 +3,19 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
+Create a .env file:
+
+```bash
+PRODIGY_KEY=AAAA-AAAA-AAAA-AAAA
+PRODIGY_BASIC_AUTH_PASS=mypass
+```
+
 Install
 
 ```bash
 pip install -e .
 ```
+
 Run
 
 ```bash
