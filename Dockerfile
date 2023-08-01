@@ -9,7 +9,7 @@ COPY .env .
 
 # Install everything
 RUN python -m pip install --upgrade pip && \
-    python -m pip install . && \
+    python -m pip install -r requirements.txt && \
     export $(cat .env) && \
     python -m pip install prodigy -f https://${PRODIGY_KEY}@download.prodi.gy
 
