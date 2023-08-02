@@ -28,4 +28,4 @@ ENV PRODIGY_BASIC_AUTH_USER "prodigy-user"
 # Expose the port number appropriate for cloud vendor
 EXPOSE 8080
 
-CMD [ "/app/start.sh" ]
+CMD [ "/app/scripts/start.sh" ]

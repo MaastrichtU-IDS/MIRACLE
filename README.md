@@ -6,7 +6,7 @@ source .venv/bin/activate
 Create a .env file:
 
 ```bash
-PRODIGY_KEY=AAAA-AAAA-AAAA-AAAA
+PRODIGY_KEY=XXXX-XXXX-XXXX-XXXX
 PRODIGY_BASIC_AUTH_PASS=mypass
 ```
 
@@ -19,5 +19,5 @@ pip install -e .
 Run
 
 ```bash
-prodigy ner.manual ner_indications blank:en data/indications.jsonl --label data/labels.txt --patterns data/patterns/all_patterns.jsonl
+prodigy ner.manual ner_indications blank:en data/indications.jsonl --label labels.txt --patterns data/patterns_all.jsonl
 ```

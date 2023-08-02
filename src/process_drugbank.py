@@ -27,8 +27,8 @@ def process(xmlfile, csvfile):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        sys.exit(f"Right usage: {sys.argv[0]} [in: drugbank.xml] [out: drugbank_drugs.csv]") 
+        sys.exit(f"Right usage: {sys.argv[0]} [in: drugbank.xml] [out: drugbank.csv]") 
 
-    print("Processing the XML file...")
+    print("Processing the Drugbank XML file...")
     drugs = process(sys.argv[1], sys.argv[2])
     print(f'Completed. See the file "{sys.argv[2]}".')
