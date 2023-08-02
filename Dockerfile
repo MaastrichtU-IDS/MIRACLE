@@ -22,7 +22,7 @@ RUN python -m pip install .
 
 # Set some environment variables
 ENV PRODIGY_LOGGING "basic"
-ENV PRODIGY_ALLOWED_SESSIONS "emirkan,michel,user6"
+ENV PRODIGY_ALLOWED_SESSIONS "emirkan,michel,vincent"
 ENV PRODIGY_BASIC_AUTH_USER "prodigy-user"
 
 # Expose the port number appropriate for cloud vendor
