@@ -25,6 +25,8 @@ ENV PRODIGY_LOGGING "basic"
 ENV PRODIGY_ALLOWED_SESSIONS "emirkan,michel,vincent"
 ENV PRODIGY_BASIC_AUTH_USER "prodigy-user"
 ENV PRODIGY_BASIC_AUTH_PASS "simple-but-not-super-easy-to-guess"
+ENV PRODIGY_HOST=0.0.0.0
+ENV PRODIGY_PORT=8080
 
 # Expose the port number appropriate for cloud vendor
 EXPOSE 8080
