@@ -1,4 +1,4 @@
-# 💫 Drug Indication annotation using Prodi.gy
+# 💫 Drug Indication annotation using Prodigy
 
 A project that uses [Prodigy](http://prodi.gy) to train a model to perform Dailymed indication annotation with their medical context
 
