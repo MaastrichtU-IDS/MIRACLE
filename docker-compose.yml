@@ -2,15 +2,15 @@ version: "3"
 services:
   prodigy-indications:
     build: .
-    # environment:
-    #   - VIRTUAL_HOST=indication-annotation.137.120.31.148.nip.io
-    #   - LETSENCRYPT_HOST=indication-annotation.137.120.31.148.nip.io
-    #   - VIRTUAL_PORT=8080
+    environment:
+      - VIRTUAL_HOST=indication-annotation.137.120.31.148.nip.io
+      - LETSENCRYPT_HOST=indication-annotation.137.120.31.148.nip.io
+      - VIRTUAL_PORT=8080
     volumes:
       - ./data:/app/data
 
     env_file:
       - .env
-    ports:
-      - 8080:8080
+    # ports:
+      # - 8080:8080
     entrypoint: prodigy ner.manual ner_indications blank:en data/indications.jsonl --label labels.txt --patterns data/patterns.jsonl

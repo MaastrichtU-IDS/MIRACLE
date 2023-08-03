@@ -2,8 +2,7 @@
 
 A project that uses [Prodigy](http://prodi.gy) to train a model to perform Dailymed indication annotation with their medical context
 
-
-## Build using Docker
+## Build and deploy using Docker
 
 1. Clone the repository
 
@@ -16,26 +15,19 @@ A project that uses [Prodigy](http://prodi.gy) to train a model to perform Daily
 
     ```bash
     PRODIGY_KEY=XXXX-XXXX-XXXX-XXXX
-    PRODIGY_BASIC_AUTH_PASS=mypass
+    PRODIGY_BASIC_AUTH_PASS=XXXX
     ```
 
-3. Build with Docker:
+3. Build and deploy with Docker:
 
     ```bash
-    docker build -t prodigy-indications .
+    docker compose up --build
     ```
 
-4. Run with Docker on http://localhost:8080
-
-    ```bash
-    docker run -d -p 8080:8080 --name prodigy-indications prodigy-indications
-    ```
-
-    You can also use a different annotation file and labels:
-
-    ```bash
-    docker run -d -p 8080:8080 --name prodigy-indications  -e DATASET_NAME=sample -e SAMPLE_SENTENCES_FILE=sample-sentences.txt -e LABELS_FILE=labels.txt umids/prodigy-indications:latest
-    ```
+4. Sign in and start annotation
+    
+    Replace the X with your session name and open http://localhost:8080/?session=X. 
+    Sign in with the username "prodigy-user" and the provided password. 
 
 ## List of Annotation Labels
 
@@ -133,4 +125,4 @@ A project that uses [Prodigy](http://prodi.gy) to train a model to perform Daily
     prodigy train ./data/indication_model --ner ner_indications_correct,ner_indications
     ```
 
-> Checkout the prodigy-recipes repository for more ways to use prodigy: https://github.com/explosion/prodigy-recipes
+    Checkout the prodigy-recipes repository for more ways to use prodigy: https://github.com/explosion/prodigy-recipes
