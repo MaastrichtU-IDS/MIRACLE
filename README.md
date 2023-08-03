@@ -22,19 +22,19 @@ A project that uses [Prodigy](http://prodi.gy) to train a model to perform Daily
 3. Build with Docker:
 
     ```bash
-    docker build -t prodigy .
+    docker build -t prodigy-indications .
     ```
 
 4. Run with Docker on http://localhost:8080
 
     ```bash
-    docker run -d -p 8080:8080 --name prodigy prodigy
+    docker run -d -p 8080:8080 --name prodigy-indications prodigy-indications
     ```
 
     You can also use a different annotation file and labels:
 
     ```bash
-    docker run -d -p 8080:8080 --name prodigy  -e DATASET_NAME=sample -e SAMPLE_SENTENCES_FILE=sample-sentences.txt -e LABELS_FILE=labels.txt umids/prodigy:latest
+    docker run -d -p 8080:8080 --name prodigy-indications  -e DATASET_NAME=sample -e SAMPLE_SENTENCES_FILE=sample-sentences.txt -e LABELS_FILE=labels.txt umids/prodigy-indications:latest
     ```
 
 ## List of Annotation Labels

@@ -1,5 +1,5 @@
 # You may need to specify the --platform depending on cloud provider
-FROM python:3.9
+FROM --platform=linux/amd64 python:3.9
 
 WORKDIR /app
 
@@ -24,6 +24,7 @@ RUN python -m pip install .
 ENV PRODIGY_LOGGING "basic"
 ENV PRODIGY_ALLOWED_SESSIONS "emirkan,michel,vincent"
 ENV PRODIGY_BASIC_AUTH_USER "prodigy-user"
+ENV PRODIGY_BASIC_AUTH_PASS "simple-but-not-super-easy-to-guess"
 
 # Expose the port number appropriate for cloud vendor
 EXPOSE 8080
