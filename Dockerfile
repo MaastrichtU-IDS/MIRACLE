@@ -3,6 +3,9 @@ FROM --platform=linux/amd64 python:3.9
 
 WORKDIR /app
 
+RUN apt-get update && \
+    apt-get install -y vim
+
 # Copy requirements first
 COPY requirements.txt .
 
