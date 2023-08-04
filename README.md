@@ -1,6 +1,6 @@
 # 💫 Drug Indication Annotation Using Prodigy
 
-A project that uses [Prodigy](http://prodi.gy) to train a model to perform Dailymed indication annotation with their medical context
+A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailymed drug indication sections with their medical context.
 
 ## Build and deploy using Docker
 
@@ -55,28 +55,27 @@ A project that uses [Prodigy](http://prodi.gy) to train a model to perform Daily
 
 ## Creating the Model
 
-1. Manually annoate and create new dataset
+1. Manually annotate a new dataset using the provided labels.
 
-    You can download and use different spacy model(s) (en_core_web_sm, en_core_web_md, en_core_web_lg)
+    Download a spacy model (en_core_web_sm, en_core_web_md, en_core_web_lg) to fine tune.
 
     ```bash
     python -m spacy download [spacy-model] 
-    python -m spacy download en_core_web_sm 
+    python -m spacy download en_core_web_sm
     ```
+    Use the ner.manual command to launch an instance of the annotation tool to generate a new annotation dataset using the indication text and the set of annotation labels.
 
     ```bash
-    prodigy ner.manual [dataset-name] blank:en [indication-sentence-file-path] --label [labels-file-path] --patterns [patterns-file-path]
-    prodigy ner.manual ner_indications blank:en ./data/indications.jsonl --label ./labels.txt --patterns ./data/patterns.jsonl
+    prodigy ner.manual [dataset-name] blank:en [indication-sentence-file-path] --label [labels-file-path]
+    prodigy ner.manual ner_indications blank:en ./data/indications.jsonl --label ./labels.txt
     ```
 
-    The server will then start up and you can start annotating. Don't forget to save your progress by clicking CTR-S. Then you can export your annotations.
+    The server will be available on http://localhost:8080 by default, and user-specific annotations can be done at http://localhost:8080/?session=USERNAME. 
 
-    ```bash
-    prodigy db-out [dataset] --dry > [dataset.jsonl]
-    prodigy db-out ner_indications --dry > sample_annotations.jsonl
-    ```
+    Make sure to save your progress by clicking the small floppy disk icon or pressing CTRL-S.
 
-2. Review the dataset
+
+1. Review the dataset
 
     View stats and list all datasets
 
@@ -84,40 +83,56 @@ A project that uses [Prodigy](http://prodi.gy) to train a model to perform Daily
     prodigy stats -l
     ```
 
-    To remove a dataset
+    Annotations can be exported with the db-out command.
+
+    ```bash
+    prodigy db-out [dataset] > [dataset.jsonl]
+    prodigy db-out ner_indications > ner_indication_annotations.jsonl
+    ```
+
+    Annotations can be imported with the db-in command.
+
+    ```bash
+    prodigy db-in [dataset] [dataset.jsonl]
+    prodigy db-in ner_indications ner_indication_annotations.jsonl
+    ```
+
+    To review annotations and resolve conflicts.
+
+    ```bash
+    prodigy review [reviewed-dataset-name] [dataset] --label [labels-file-path]
+    prodigy review ner_indications --label ./labels.txt
+    ```
+    
+    To delete a dataset
 
     ```bash
     prodigy drop [dataset]
     ```
 
-    Review annotations and outputs to resolve conflicts.
-
-    ```bash
-    prodigy review [reviewed-dataset-name] [dataset] --label [labels-file-path]
-    prodigy review sample-review ner_indications --label ./labels.txt
-    ```
-
-    You can export the patterns.
+    To export the patterns.
 
     ```bash
     prodigy terms.to-patterns [dataset] [dataset-patterns.jsonl] --label [labels-file-path] -m blank:en
     prodigy terms.to-patterns ner_indications ./sample-patterns.jsonl --label ./labels.txt -m blank:en
     ```
 
-3. Model training
+2. Model training
 
+    To train the model with the set of annotations, you provide the training dataset and an output directory for the model.
+   
     ```bash
     prodigy train [output-model-dir] --ner [training-dataset] 
-    prodigy train ./data/tmp_model --ner ner_indications 
+    prodigy train ./data/indication_model --ner ner_indications 
     ```
 
 4. Correcting the model’s suggestions and retraining
 
-    Make adjustments on the model's annotations (exlude the already annotated samples) 
+    To make adjustments on the model's annotations (exlude the already annotated samples) 
 
     ```bash
     prodigy ner.correct [corrected-dataset] [model] [source] --label [labels-file-path] --exclude [previos-dataset]
-    prodigy ner.correct ner_indications_correct ./data/tmp_model/model-best ./data/indications.jsonl --label ./labels.txt --exclude ner_indications
+    prodigy ner.correct ner_indications_correct ./data/indication_model/model-best ./data/indications.jsonl --label ./labels.txt --exclude ner_indications
     ```
 
     After correcting the model's suggestion, train again with the two dataset and depending on the model's performance continue with correction and training
