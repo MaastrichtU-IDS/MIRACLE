@@ -25,7 +25,6 @@ RUN python -m pip install .
 
 # Set some environment variables
 ENV PRODIGY_LOGGING "basic"
-ENV PRODIGY_ALLOWED_SESSIONS "emirkan,michel,vincent"
 ENV PRODIGY_BASIC_AUTH_USER "prodigy-user"
 ENV PRODIGY_HOST=0.0.0.0
 ENV PRODIGY_PORT=8080

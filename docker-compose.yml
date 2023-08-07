@@ -13,4 +13,4 @@ services:
       - .env
     # ports:
       # - 8080:8080
-    entrypoint: prodigy ner.manual ner_indications blank:en data/indications.jsonl --label labels.txt --patterns data/patterns.jsonl
+    entrypoint: ./scripts/start.sh
