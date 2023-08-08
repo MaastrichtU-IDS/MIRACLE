@@ -1,6 +1,7 @@
 version: "3"
 services:
   prodigy-indications:
+    container_name: prodigy-dailymed
     build: .
     environment:
       - VIRTUAL_HOST=indication-annotation.137.120.31.148.nip.io
