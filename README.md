@@ -21,13 +21,18 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
 3. Build and deploy with Docker:
 
     ```bash
-    docker compose up --build
+    docker compose up --build --remove-orphans
     ```
 
 4. Sign in and start annotation
     
     Replace the X with your session name and open http://localhost:8080/?session=X. 
-    Sign in with the username "prodigy-user" and the provided password. 
+    Sign in with the username "prodigy-user" and the provided password.
+
+5. Enter container to run commands.
+    ```
+    docker exec -it prodigy-dailymed bash
+    ```
 
 ## List of Annotation Labels
 1. DRUG: The drug name or the active ingredient
