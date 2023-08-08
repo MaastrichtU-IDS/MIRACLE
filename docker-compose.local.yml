@@ -1,0 +1,12 @@
+version: "3"
+services:
+  prodigy-indications:
+    container_name: prodigy-dailymed
+    build: .
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    ports:
+       - 8080:8080
+    entrypoint: ./scripts/start.sh
