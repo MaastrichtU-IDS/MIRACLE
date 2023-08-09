@@ -31,5 +31,3 @@ ENV PRODIGY_PORT=8080
 
 # Expose the port number appropriate for cloud vendor
 EXPOSE 8080
-
-CMD [ "/app/scripts/start.sh" ]
