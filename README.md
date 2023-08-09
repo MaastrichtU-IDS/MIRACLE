@@ -5,7 +5,7 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
 ## Build and deploy using Docker
 
 1. Clone the repository
-
+   
     ```bash
     git clone https://github.com/ebylmz/prodigy-drug-indication-annotation
     cd prodigy-drug-indication-annotation
@@ -32,8 +32,15 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     ```
 
 4. Enter container to run commands
+
     ```
     docker exec -it prodigy-dailymed bash
+    ```
+
+5. Stop and remove the container
+
+    ```bash
+    docker compose down
     ```
 
 ## List of Annotation Labels
