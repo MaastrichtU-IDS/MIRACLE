@@ -11,25 +11,27 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     cd prodigy-drug-indication-annotation
     ```
 
-2. Create a .env file:
+2. Create a .env file
 
     ```bash
     PRODIGY_KEY=XXXX-XXXX-XXXX-XXXX
+    PRODIGY_ALLOWED_SESSIONS=USERNAME_1,USERNAME_2
     PRODIGY_BASIC_AUTH_PASS=XXXX
     ```
 
-3. Build and deploy with Docker:
+3. Build and deploy with Docker
 
     ```bash
     docker compose up --build --remove-orphans
     ```
-
-4. Sign in and start annotation
     
-    Replace the X with your session name and open http://localhost:8080/?session=X. 
-    Sign in with the username "prodigy-user" and the provided password.
+    View the logs
+    
+    ```bash
+    docker compose logs
+    ```
 
-5. Enter container to run commands.
+4. Enter container to run commands
     ```
     docker exec -it prodigy-dailymed bash
     ```
@@ -60,7 +62,7 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
 
 ## Creating the Model
 
-1. Manually annotate a new dataset using the provided labels.
+1. Manually annotate samples using the provided labels to create a dataset for the training.
 
     Download a spacy model (en_core_web_sm, en_core_web_md, en_core_web_lg) to fine tune.
 
@@ -68,6 +70,7 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     python -m spacy download [spacy-model] 
     python -m spacy download en_core_web_sm
     ```
+    
     Use the ner.manual command to launch an instance of the annotation tool to generate a new annotation dataset using the indication text and the set of annotation labels.
 
     ```bash
@@ -75,38 +78,37 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     prodigy ner.manual ner_indications blank:en ./data/indications.jsonl --label ./labels.txt
     ```
 
-    The server will be available on http://localhost:8080 by default, and user-specific annotations can be done at http://localhost:8080/?session=USERNAME. 
+    The server will be available on http://localhost:8080 by default, and user-specific annotations can be done at http://localhost:8080/?session=USERNAME. For the first time you need to sign in with the username "prodigy-user" and the PRODIGY_BASIC_AUTH_PASS which should be in the .env file.
 
     Make sure to save your progress by clicking the small floppy disk icon or pressing CTRL-S.
 
+2. Review the dataset
 
-1. Review the dataset
-
-    View stats and list all datasets
+    List all datasets an sessions
 
     ```bash
-    prodigy stats -l
+    prodigy stats -ls
     ```
 
     Annotations can be exported with the db-out command.
 
     ```bash
     prodigy db-out [dataset] > [dataset.jsonl]
-    prodigy db-out ner_indications > ner_indication_annotations.jsonl
+    prodigy db-out ner_indications > ner_indications_annotations.jsonl
     ```
 
     Annotations can be imported with the db-in command.
 
     ```bash
     prodigy db-in [dataset] [dataset.jsonl]
-    prodigy db-in ner_indications ner_indication_annotations.jsonl
+    prodigy db-in ner_indications ner_indications_annotations.jsonl
     ```
 
     To review annotations and resolve conflicts.
 
     ```bash
     prodigy review [reviewed-dataset-name] [dataset] --label [labels-file-path]
-    prodigy review ner_indications --label ./labels.txt
+    prodigy review ner_indications_review ner_indications --label ./labels.txt
     ```
     
     To delete a dataset
@@ -115,20 +117,13 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     prodigy drop [dataset]
     ```
 
-    To export the patterns.
-
-    ```bash
-    prodigy terms.to-patterns [dataset] [dataset-patterns.jsonl] --label [labels-file-path] -m blank:en
-    prodigy terms.to-patterns ner_indications ./sample-patterns.jsonl --label ./labels.txt -m blank:en
-    ```
-
-2. Model training
+3. Model training
 
     To train the model with the set of annotations, you provide the training dataset and an output directory for the model.
    
     ```bash
     prodigy train [output-model-dir] --ner [training-dataset] 
-    prodigy train ./data/indication_model --ner ner_indications 
+    prodigy train ./data/ner_indications_model --ner ner_indications 
     ```
 
 4. Correcting the model’s suggestions and retraining
@@ -137,13 +132,13 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
 
     ```bash
     prodigy ner.correct [corrected-dataset] [model] [source] --label [labels-file-path] --exclude [previos-dataset]
-    prodigy ner.correct ner_indications_correct ./data/indication_model/model-best ./data/indications.jsonl --label ./labels.txt --exclude ner_indications
+    prodigy ner.correct ner_indications_correct ./data/ner_indications_model/model-best ./data/indications.jsonl --label ./labels.txt --exclude ner_indications
     ```
 
     After correcting the model's suggestion, train again with the two dataset and depending on the model's performance continue with correction and training
     
     ```bash
-    prodigy train ./data/indication_model --ner ner_indications_correct,ner_indications
+    prodigy train ./data/ner_indications_model --ner ner_indications_correct,ner_indications
     ```
 
-    Checkout the prodigy-recipes repository for more ways to use prodigy: https://github.com/explosion/prodigy-recipes
+    Checkout the [prodigy-recipes](https://github.com/explosion/prodigy-recipes) repository for more ways to use prodigy
