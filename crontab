@@ -1,0 +1,3 @@
+# run the backup.sh everyday at 2 AM
+0 2 * * * /app/scripts/backup.sh
+# remember to end this file with an empty new line
