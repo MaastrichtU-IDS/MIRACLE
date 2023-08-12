@@ -22,7 +22,7 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
 3. Build and deploy with Docker
 
     ```bash
-    docker compose up --build --remove-orphans
+    docker compose up -d--build --remove-orphans
     ```
     
     View the logs
@@ -70,18 +70,10 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
 ## Creating the Model
 
 1. Manually annotate samples using the provided labels to create a dataset for the training.
-
-    Download a spacy model (en_core_web_sm, en_core_web_md, en_core_web_lg) to fine tune.
-
-    ```bash
-    python -m spacy download [spacy-model] 
-    python -m spacy download en_core_web_sm
-    ```
     
     Use the ner.manual command to launch an instance of the annotation tool to generate a new annotation dataset using the indication text and the set of annotation labels.
 
     ```bash
-    prodigy ner.manual [dataset-name] blank:en [indication-sentence-file-path] --label [labels-file-path]
     prodigy ner.manual ner_indications blank:en ./data/indications.jsonl --label ./labels.txt
     ```
 
@@ -100,52 +92,51 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     Annotations can be exported with the db-out command.
 
     ```bash
-    prodigy db-out [dataset] > [dataset.jsonl]
     prodigy db-out ner_indications > ner_indications_annotations.jsonl
     ```
 
     Annotations can be imported with the db-in command.
 
     ```bash
-    prodigy db-in [dataset] [dataset.jsonl]
     prodigy db-in ner_indications ner_indications_annotations.jsonl
     ```
 
-    To review annotations and resolve conflicts.
+    For multiple user session, there could be conflicts and they need to be resolved before the model training. 
+    
+    Review recipe enables to create a new dataset "ner_indications_review" by resolving conflicts in "ner_indications" dataset.
 
     ```bash
-    prodigy review [reviewed-dataset-name] [dataset] --label [labels-file-path]
     prodigy review ner_indications_review ner_indications --label ./labels.txt
     ```
     
     To delete a dataset
 
     ```bash
-    prodigy drop [dataset]
+    prodigy drop unused_dataset
     ```
 
 3. Model training
 
-    To train the model with the set of annotations, you provide the training dataset and an output directory for the model.
-   
+    To train the model with the set of annotations, you provide the training dataset and an output directory for the model. 
+    
+    The model is saved as model-best and model-last in the given output directory. model-best indicates the best version and the model-last indicates the last version of model during the training iterations. 
+
     ```bash
-    prodigy train [output-model-dir] --ner [training-dataset] 
-    prodigy train ./data/ner_indications_model --ner ner_indications 
+    prodigy train ./data/ner_indications_model --ner ner_indications --label-stats
     ```
 
 4. Correcting the model’s suggestions and retraining
 
-    To make adjustments on the model's annotations (exlude the already annotated samples) 
+    To make adjustments on the model's annotations (exlude the already annotated samples from "ner_indication" dataset) 
 
     ```bash
-    prodigy ner.correct [corrected-dataset] [model] [source] --label [labels-file-path] --exclude [previos-dataset]
     prodigy ner.correct ner_indications_correct ./data/ner_indications_model/model-best ./data/indications.jsonl --label ./labels.txt --exclude ner_indications
     ```
 
-    After correcting the model's suggestion, train again with the two dataset and depending on the model's performance continue with correction and training
-    
+    After correcting the model's suggestion, re-train the last-model and depending on the model's performance continue with correction and training.
+
     ```bash
-    prodigy train ./data/ner_indications_model --ner ner_indications_correct,ner_indications
+    prodigy train ./data/ner_indications_model/model-last --ner ner_indications_correct --label-stats
     ```
 
     Checkout the [prodigy-recipes](https://github.com/explosion/prodigy-recipes) repository for more ways to use prodigy
