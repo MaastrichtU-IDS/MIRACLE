@@ -139,4 +139,10 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     prodigy train ./data/ner_indications_model/model-last --ner ner_indications_correct --label-stats
     ```
 
+    You can use train-curve recipe to see whether more data improves the model or not. As a rule of thumb, if accuracy improves within the last 25%, training with more examples will likely result in better accuracy.
+
+    ```bash
+    prodigy train-curve --ner ner_indications_correct --show-plot
+    ```
+
     Checkout the [prodigy-recipes](https://github.com/explosion/prodigy-recipes) repository for more ways to use prodigy
