@@ -1,4 +1,4 @@
-# 💫 MIRACLE (Medical Indication Recognition and Active Context Learning Engine)
+# 🌟 MIRACLE (Medical Indication Recognition and Active Context Learning Engine)
 
 A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailymed drug indication sections with their medical context.
 
