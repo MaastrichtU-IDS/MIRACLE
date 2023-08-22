@@ -34,7 +34,7 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
 4. Enter container to run commands
 
     ```bash
-    docker exec -it prodigy-dailymed bash
+    docker exec -it prodigy-indications bash
     ```
 
 5. Stop and remove the container
@@ -121,7 +121,7 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     The model is saved as model-best and model-last in the given output directory. model-best indicates the best version and the model-last indicates the last version of model during the training iterations. 
 
     ```bash
-    prodigy train ./model --ner ner_indications --label-stats
+    prodigy train ./models/miracle --ner ner_indications --label-stats
     ```
 
 4. Correcting the model’s suggestions and retraining
@@ -129,13 +129,13 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     To make adjustments on the model's annotations (exlude the already annotated samples from "ner_indication" dataset) 
 
     ```bash
-    prodigy ner.correct ner_indications ./model/model-best ./data/indications.jsonl --label ./labels.txt --exclude ner_indications
+    prodigy ner.correct ner_indications ./models/miracle/model-best ./data/indications.jsonl --label ./labels.txt --exclude ner_indications
     ```
 
     After correcting the model's suggestion, re-train the last-model and depending on the model's performance continue with correction and training.
 
     ```bash
-    prodigy train ./model/model-last --ner ner_indications --label-stats
+    prodigy train ./models/miracle/model-last --ner ner_indications --label-stats
     ```
 
     You can use train-curve recipe to see whether more data improves the model or not. As a rule of thumb, if accuracy improves within the last 25%, training with more examples will likely result in better accuracy.
