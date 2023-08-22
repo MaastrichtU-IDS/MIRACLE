@@ -1,8 +1,8 @@
-# 💫 Drug Indication Annotation Using Prodigy
+# 💫 MIRACLE (Medical Indication Recognition and Active Context Learning Engine)
 
 A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailymed drug indication sections with their medical context.
 
-## Build and deploy using Docker
+## 🛠️ Build and deploy with Docker
 
 1. Clone the repository
    
@@ -33,7 +33,7 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
 
 4. Enter container to run commands
 
-    ```
+    ```bash
     docker exec -it prodigy-dailymed bash
     ```
 
@@ -43,7 +43,7 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     docker compose down
     ```
 
-## List of Annotation Labels
+## 📋 List of Annotation Labels
 1. DRUG: The drug name or the active ingredient
 2. ROUTE: The route of administration (e.g. oral, intravenous, topical)
 3. FORMULATION: The formulation of the drug (e.g. solution, tablet)
@@ -66,8 +66,7 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
 20. CONTRAINDICATION: The manner in which the drug should not or must not be be used.
 21. INEFFECTIVE: The manner in which the drug is ineffective.
 
-
-## Creating the Model
+## 🚀 Creating the Model
 
 1. Manually annotate samples using the provided labels to create a dataset for the training.
     
@@ -98,7 +97,7 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     Annotations can be imported with the db-in command.
 
     ```bash
-    prodigy db-in ner_indications ner_indications_annotations.jsonl
+    prodigy db-in ner_indications backup/latest.jsonl
     ```
 
     For multiple user session, there could be conflicts and they need to be resolved before the model training. 
@@ -122,7 +121,7 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     The model is saved as model-best and model-last in the given output directory. model-best indicates the best version and the model-last indicates the last version of model during the training iterations. 
 
     ```bash
-    prodigy train ./data/ner_indications_model --ner ner_indications --label-stats
+    prodigy train ./model --ner ner_indications --label-stats
     ```
 
 4. Correcting the model’s suggestions and retraining
@@ -130,19 +129,19 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     To make adjustments on the model's annotations (exlude the already annotated samples from "ner_indication" dataset) 
 
     ```bash
-    prodigy ner.correct ner_indications_correct ./data/ner_indications_model/model-best ./data/indications.jsonl --label ./labels.txt --exclude ner_indications
+    prodigy ner.correct ner_indications ./model/model-best ./data/indications.jsonl --label ./labels.txt --exclude ner_indications
     ```
 
     After correcting the model's suggestion, re-train the last-model and depending on the model's performance continue with correction and training.
 
     ```bash
-    prodigy train ./data/ner_indications_model/model-last --ner ner_indications_correct --label-stats
+    prodigy train ./model/model-last --ner ner_indications --label-stats
     ```
 
     You can use train-curve recipe to see whether more data improves the model or not. As a rule of thumb, if accuracy improves within the last 25%, training with more examples will likely result in better accuracy.
 
     ```bash
-    prodigy train-curve --ner ner_indications_correct --show-plot
+    prodigy train-curve --ner ner_indications --show-plot
     ```
 
-    Checkout the [prodigy-recipes](https://github.com/explosion/prodigy-recipes) repository for more ways to use prodigy
+    Checkout the [prodigy-recipes](https://github.com/explosion/prodigy-recipes) for more ways to use prodigy
