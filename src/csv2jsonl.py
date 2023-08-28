@@ -2,10 +2,10 @@ import pandas as pd
 import argparse
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Convert CSV to JSONL')
+    parser = argparse.ArgumentParser(description='Generate a Prodigy annotation sample file by using "text" column from the given CSV file')
 
-    parser.add_argument('--input_csv', help='Path to input CSV file')
-    parser.add_argument('--output_jsonl', help='Path to output JSONL file')
+    parser.add_argument('input_csv', help='Path to input CSV file')
+    parser.add_argument('output_jsonl', help='Path to output JSONL file')
 
     args = parser.parse_args()
 
