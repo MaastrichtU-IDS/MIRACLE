@@ -13,7 +13,7 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
 
 2. Create a .env file
 
-    ```bash
+    ```
     PRODIGY_KEY=XXXX-XXXX-XXXX-XXXX
     PRODIGY_ALLOWED_SESSIONS=USERNAME_1,USERNAME_2
     PRODIGY_BASIC_AUTH_PASS=XXXX
@@ -145,3 +145,34 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     ```
 
     Checkout the [prodigy-recipes](https://github.com/explosion/prodigy-recipes) for more ways to use prodigy
+
+5. Getting help from LLM
+
+    To use a LLM with spaCy you’ll need a configuration file that tells spacy-llm how to construct a prompt for your task. We already made a configuration for OpenAI. You can find a sample configuration for OpenAI in 'spacy-llm-config.cfg'.
+
+    You might be using a vendor like OpenAI, as a backend for your LLM. In such cases you’ll need to setup up secrets such that you can identify yourself.
+
+    ```
+    OPENAI_API_ORG = "org-..."
+    OPENAI_API_KEY = "sk-..."
+    ```
+
+    This recipe marks entity predictions obtained from a large language model configured by spacy-llm and allows you to accept them as correct, or to manually curate them. 
+
+    The ner.llm.correct recipe fetches examples from large language models while annotating and it allows you to accept them as correct, or to manually curate them.  
+    
+    ```bash
+    dotenv run -- prodigy ner.llm.correct ner_indications spacy-llm-config.cfg data/indications.jsonl
+    ```
+
+    The ner.llm.fetch recipe can fetch a large batch of examples upfront.
+
+    ```bash
+    dotenv run -- prodigy ner.llm.fetch spacy-llm-config.cfg data/indications.jsonl data/llm_annotated.jsonl
+    ```
+
+    After downloading such a batch of examples you can use ner.manual to correct the annotations.
+
+    ```bash
+    prodigy ner.manual ner_indications blank:en data/llm_annotated.jsonl --label labels.txt
+    ```
