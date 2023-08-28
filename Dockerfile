@@ -1,4 +1,4 @@
-# You may need to specify the --platform depending on cloud provider
+# Specify the platform depending on cloud provider
 FROM --platform=linux/amd64 python:3.9
 
 WORKDIR /app
