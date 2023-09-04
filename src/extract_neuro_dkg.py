@@ -96,7 +96,7 @@ def parse(g_neuro_dkg, g_neuro_dkg_biolink, g_indications, output_csv):
     )
 
     with open(output_csv, mode='w', newline='') as csv_file:
-        fieldnames = ['Drug', 'Disease', 'Target Group', 'Indication Text']
+        fieldnames = ['DRUG', 'CONDITION', 'TARGET_GROUP', 'text']
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
 
@@ -112,7 +112,7 @@ def parse(g_neuro_dkg, g_neuro_dkg_biolink, g_indications, output_csv):
             target_group = get_target_group(g_neuro_dkg, target_group_url, ns1)
 
             # Write data to CSV file
-            writer.writerow({'Drug': drug, 'Disease': disease, 'Target Group': target_group, 'Indication Text': indication_text})
+            writer.writerow({'DRUG': drug, 'CONDITION': disease, 'TARGET_GROUP': target_group, 'text': indication_text})
 
 def load_rdf_graph(file_path):
     g = Graph()
