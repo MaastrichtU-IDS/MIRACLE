@@ -16,9 +16,11 @@ classifiers = [
 dependencies = [
     "requests",
     "rdflib",
-    "pandas"
+    "pandas",
+    "scikit-learn",
+    "fuzzywuzzy",
+    "python-Levenshtein"
 ]
-
 
 [project.optional-dependencies]
 test = [

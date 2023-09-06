@@ -150,6 +150,9 @@ def get_target_group(g_neuro_dkg, target_group_urls, ns1, rdfs):
     
     return target_group
 
+def combine_rows(row):
+    pass
+
 def extract(g_neuro_dkg, g_indications, output_csv):
     nkgi_indications = Namespace("http://www.w3id.org/neurodkg/Instances/")
     rdfs = Namespace("http://www.w3.org/2000/01/rdf-schema#")
@@ -171,7 +174,9 @@ def extract(g_neuro_dkg, g_indications, output_csv):
         initNs={"ns1": ns1}
     )
 
-    rows = []
+    # rows = []
+    text_to_row = {}  # Dictionary to collect rows by 'text' value
+
     for result in g_neuro_dkg.query(query):
         context_url = result["context"]
         drug_url = result["drug"]
@@ -185,11 +190,16 @@ def extract(g_neuro_dkg, g_indications, output_csv):
         target_group = get_target_group(g_neuro_dkg, target_group_urls, ns1, rdfs)
         indication_text = get_indication_text(g_indications, context_no, nkgi_indications, rdfs)
 
-        row = {}
-        row['CONTEXT_NO'] = context_no 
-        row['DRUG'] = drug 
-        row['DISEASE'] = disease 
-        row['text'] = indication_text 
+        if not indication_text:
+            continue
+
+        # Create a dictionary representing the row
+        row = {
+            'CONTEXT_NO': context_no,
+            'DRUG': drug,
+            'DISEASE': disease,
+            'text': indication_text,
+        }
 
         # Remove the treatment code
         target_group.pop('TREATMENT_CODE')
@@ -202,11 +212,41 @@ def extract(g_neuro_dkg, g_indications, output_csv):
             for value in target_group[key]:
                 row[key].add(str(value))
 
-            # If the set is consist of single entry, just add the row value as string 
             if len(row[key]) == 1:
-                row[key] = target_group[key][0] 
+                row[key] = str(target_group[key][0])
 
-        rows.append(row)
+        # Collect rows by 'text' value
+        if indication_text not in text_to_row:
+            text_to_row[indication_text] = row.copy()
+        else:
+            # Merge rows with the same 'text' value
+            for key, value in row.items():
+                if not value or key == 'text':
+                    continue
+                
+                if not text_to_row[indication_text].get(key, None):
+                    text_to_row[indication_text][key] = value
+                
+                if isinstance(text_to_row[indication_text][key], str):
+                    if isinstance(value, str):
+                        if text_to_row[indication_text][key] != value:
+                            tmp = text_to_row[indication_text][key]
+                            text_to_row[indication_text][key] = set()
+                            text_to_row[indication_text][key].add(tmp)
+                            text_to_row[indication_text][key].add(value)
+                    else:
+                        value.add(text_to_row[indication_text])
+                        text_to_row[indication_text] = value
+                else:
+                    if isinstance(value, str):
+                        text_to_row[indication_text][key].add(str(value))
+                    else:
+                        text_to_row[indication_text][key] = text_to_row[indication_text][key].union(value)
+                        if len(text_to_row[indication_text][key]) == 1:
+                            text_to_row[indication_text][key] = text_to_row[indication_text][key].pop()
+    
+    # Convert the text_to_row dictionary to a list of rows
+    combined_rows = list(text_to_row.values())
 
     with open(output_csv, mode='w', newline='') as csv_file:
         fieldnames = [
@@ -216,7 +256,7 @@ def extract(g_neuro_dkg, g_indications, output_csv):
         
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows(combined_rows)
 
 def load_rdf_graph(file_path):
     g = Graph()
