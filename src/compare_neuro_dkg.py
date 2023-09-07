@@ -4,7 +4,6 @@ import pandas as pd
 from sklearn.metrics import precision_score, recall_score, f1_score
 from fuzzywuzzy import fuzz
 
-# Define a function for text similarity (you can adjust the threshold)
 def is_similar(str1, str2, similarity_threshold):
     return fuzz.ratio(str1, str2) > similarity_threshold
 
@@ -33,20 +32,16 @@ def calculate_ner_metrics(gold_standard_col, ner_annotations_col, similarity_thr
     fp = len(ner_annotations_col) - tp
 
     # Calculate precision, recall, and F1 score (avoid division by zero)
-    if tp + fp == 0:
-        precision = 0
-    else:
-        precision = tp / (tp + fp)
+    positive_predictions = tp + fp 
+    positives_actuals = tp + fn
 
-    if tp + fn == 0:
-        recall = 0
-    else:
-        recall = tp / (tp + fn)
-
-    if precision + recall == 0:
-        f1 = 0
-    else:
-        f1 = 2 * (precision * recall) / (precision + recall)
+    # Precision measures how many of the positive predictions made are correct (true positives)
+    precision = tp / positive_predictions if positive_predictions > 0 else 0
+    # Recall measures how many of the positive cases the classifier correctly predicted, over all the positive cases in the data
+    recall = tp / positives_actuals if positives_actuals > 0 else 0
+    sum_precision_recall = precision + recall
+    # F1-Score is the harmonic mean of precision and recall
+    f1 = 2 * (precision * recall) / sum_precision_recall if sum_precision_recall > 0 else 0
 
     return precision, recall, f1
 
