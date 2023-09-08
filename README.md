@@ -44,27 +44,27 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     ```
 
 ## 📋 List of Annotation Labels
-1. DRUG: The drug name or the active ingredient
-2. ROUTE: The route of administration (e.g. oral, intravenous, topical)
-3. FORMULATION: The formulation of the drug (e.g. solution, tablet)
-4. MECHANISM: The drug mechanism of action (e.g. protein inhibitor)
-5. ADJUNCT_TO: Where the drug acts as an adjunctive therapy, use this label to identify what it is combined with.
+1. DRUG: The drug name or the active ingredient. 
+2. SALT: The salt form of the drug.
+3. ROUTE: The route of administration (e.g. oral, intravenous, topical)
+4. FORMULATION: The formulation of the drug (e.g. solution, tablet)
+5. MECHANISM: The drug mechanism of action (e.g. protein inhibitor)
 6. ACTION: The action between the drug and the condition (e.g. treatment of, management of)
-7. CONDITION: The condition that is indicated for the drug (e.g. tremors, pain)
+7. INDICATION: The condition that is indicated for the drug (e.g. tremors, pain)
 8. BASECONDITION: The base condition is the underlying pathophysiological state in which the indicated condition is a symptom of (e.g. parkinson's, cancer)
-9. ANATOMY: The specific anatomical part for which the condition is localized to.
+9. ANATOMY: The specific anatomical part for which the condition is localized to (e.g. skin)
 10. CAUSED_BY: The cause of the condition that is to be treated (e.g. E. coli for an infection)
-11. SYMPTOM: Symptoms that are mentioned that are part of the medical context of treatment, but is not the target of the treatment.
+11. SYMPTOM: Symptoms exhibited by the paitent, but is not the treatable indication.
 12. TARGET_GROUP: Group of patients or individuals for whom a particular drug is intended or designed to be used.
-13. CO_MORBIDITY: Other conditions that may be present as part of the target group. 
+13. CO_MORBIDITY: Other conditions that may be present as part of the target group.
 14. CO_PRESCRIPTION: Other medications that may be in use by the target group.
 15. HISTORY: Statements relating to the medical history of the target group.
 16. TEMPORALITY: Statements relating to the temporality of the treatment.
 17. MEDICAL_CTX: Statements that discuss the medical context beyond those mentioned above
 18. EFFECT: Intended beneficial effects of the treatment.
 19. SIDEEFFECT: Negative side effects of the treatment.
-20. CONTRAINDICATION: The manner in which the drug should not or must not be be used.
-21. INEFFECTIVE: The manner in which the drug is ineffective.
+20. CONTRAINDICATION: The sentence that specifies a contraindication, or where the drug should not or must not be be used.
+21. INEFFECTIVE: The manner The sentence that specifies on what case the the drug is ineffective.
 
 ## 🚀 Creating the Model
 
