@@ -7,8 +7,8 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
 1. Clone the repository
    
     ```bash
-    git clone https://github.com/ebylmz/prodigy-drug-indication-annotation
-    cd prodigy-drug-indication-annotation
+    git clone https://github.com/MaastrichtU-IDS/MIRACLE/
+    cd miracle
     ```
 
 2. Create a .env file
@@ -34,7 +34,7 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
 4. Enter container to run commands
 
     ```bash
-    docker exec -it prodigy-indications bash
+    docker exec -it prodigy-dailymed bash
     ```
 
 5. Stop and remove the container
