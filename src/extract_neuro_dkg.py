@@ -174,7 +174,6 @@ def extract(g_neuro_dkg, g_indications, output_csv):
         initNs={"ns1": ns1}
     )
 
-    # rows = []
     text_to_row = {}  # Dictionary to collect rows by 'text' value
 
     for result in g_neuro_dkg.query(query):

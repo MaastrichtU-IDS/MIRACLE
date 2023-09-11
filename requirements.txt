@@ -3,3 +3,4 @@ pandas
 rdflib
 fuzzywuzzy
 python-Levenshtein
+pyyaml
