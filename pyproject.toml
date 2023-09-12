@@ -19,7 +19,8 @@ dependencies = [
     "pandas",
     "scikit-learn",
     "fuzzywuzzy",
-    "python-Levenshtein"
+    "python-Levenshtein",
+    "pyyaml"
 ]
 
 [project.optional-dependencies]
