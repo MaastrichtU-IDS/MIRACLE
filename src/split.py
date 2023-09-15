@@ -2,7 +2,7 @@ import argparse
 import json
 import random
 
-def split_jsonl(input_file, train_output_file, eval_output_file, split_ratio):
+def split_jsonl(input_file, train_output_file, eval_output_file, split_ratio, random_seed=None):
     total_samples = 0
     num_ignored = 0
 
@@ -16,6 +16,10 @@ def split_jsonl(input_file, train_output_file, eval_output_file, split_ratio):
                 data.append(item)
             else:
                 num_ignored += 1
+
+    # Set a random seed for reproducibility if provided
+    if random_seed is not None:
+        random.seed(random_seed)
 
     random.shuffle(data)
     num_samples = len(data)
@@ -52,7 +56,8 @@ if __name__ == '__main__':
     parser.add_argument('train_output_file', help='Output training JSONL file')
     parser.add_argument('eval_output_file', help='Output evaluation JSONL file')
     parser.add_argument('--split_ratio', type=float, default=0.8, help='Split ratio (default: 0.8)')
+    parser.add_argument('--random_seed', type=int, default=None, help='Random seed for reproducibility')
 
     args = parser.parse_args()
 
-    split_jsonl(args.input_file, args.train_output_file, args.eval_output_file, args.split_ratio)
+    split_jsonl(args.input_file, args.train_output_file, args.eval_output_file, args.split_ratio, args.random_seed)

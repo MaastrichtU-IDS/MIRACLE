@@ -2,56 +2,71 @@ import os
 import json
 import csv
 import argparse
-from collections import Counter
-from prodigy.components.db import connect
-from prodigy.util import get_labels
 
-def process_db(db_name: str, counts: Counter):
-    db = connect()
-    examples = db.get_dataset(db_name)
-    total = 0
-    for eg in examples:
-        eg_labels = [span["label"] for span in eg.get("spans", [])]
-        for label in eg_labels:
-            counts[label] += 1
-            total += 1
-    return total
+def process_db(input_file: str):
+    counts = {}  # Dictionary to store label counts
+
+    with open(input_file, 'r') as jsonl_file:
+        for line in jsonl_file:
+            data = json.loads(line)
+
+            for span in data.get('spans', []):
+                label = span['label']
+                counts[label] = counts.get(label, 0) + 1
+
+    return counts
+
+def calculate_percentage(count, total):
+    return round((count / total) * 100, 2)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate label distribution statistics.")
-    parser.add_argument("model_dir_path", help="Path to the model directory")
-    parser.add_argument("training_dataset", help="Name of the training dataset")
-    parser.add_argument("labels_file", help="Path to the labels.txt file")
-    parser.add_argument("output_csv", help="Path to the output CSV file")
+    parser.add_argument("training_dataset", help="Path to the training dataset in JSONL format")
+    parser.add_argument("output_csv", help="Path to the output CSV file to save statistics")
+    parser.add_argument("--model_dir_path", help="Path to the model directory containing meta.json")
 
     args = parser.parse_args()
 
-    model_path = os.path.join(args.model_dir_path, "meta.json")
+    # Load model performance data
+    if args.model_dir_path:
+        model_path = os.path.join(args.model_dir_path, "meta.json")
+        with open(model_path) as file:
+            performances = json.load(file)['performance']['ents_per_type']
 
-    with open(model_path) as file:
-        performances = json.load(file)['performance']['ents_per_type']
+    # Process the training dataset
+    counts = process_db(args.training_dataset)
+    total = sum(counts.values())
 
-    counts = Counter()
-    for label in get_labels(args.labels_file):
-        counts[label] = 0
-
-    total = process_db(args.training_dataset, counts)
-
-    perf_default = {'p': 0.0, 'r': 0.0, 'f': 0.0}
-
+    # Sort label counts in descending order
     counts_sorted = sorted(counts.items(), key=lambda item: item[1], reverse=True)
 
+    # Write statistics to the output CSV file
     with open(args.output_csv, 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, ['Label', 'Count', 'Distribution', 'Precision', 'Recall', 'F1Score'])
+        if args.model_dir_path:
+            headers = ['Label', 'Count', 'Frequency', 'Precision', 'Recall', 'F1Score']
+        else:
+            headers =  ['Label', 'Count', 'Frequency']
+        
+        writer = csv.DictWriter(csvfile, headers)
         writer.writeheader()
 
-        writer.writerows({
-            'Label': label,
-            'Count': count,
-            'Distribution': round((count / total) * 100, 2),
-            'Precision': round(performances.get(label, perf_default)['p'] * 100, 2),
-            'Recall': round(performances.get(label, perf_default)['r'] * 100, 2),
-            'F1Score': round(performances.get(label, perf_default)['f'] * 100, 2)
-        } for label, count in counts_sorted)
+        if args.model_dir_path:
+            perf_default = {'p': 0.0, 'r': 0.0, 'f': 0.0}
+            writer.writerows({
+                'Label': label,
+                'Count': count,
+                'Frequency': calculate_percentage(count, total),
+                'Precision': round(performances.get(label, perf_default)['p'] * 100, 2),
+                'Recall': round(performances.get(label, perf_default)['r'] * 100, 2),
+                'F1Score': round(performances.get(label, perf_default)['f'] * 100, 2)
+            } for label, count in counts_sorted)
+        else:
+            writer.writerows({
+                'Label': label,
+                'Count': count,
+                'Frequency': calculate_percentage(count, total),
+            } for label, count in counts_sorted)
 
-    print(f'Total # annotation is {total}. Statistics saved in "{args.output_csv}"')
+    # Print total annotation count and the location of the saved statistics
+    print(f'Total # annotations: {total}')
+    print(f'Statistics saved in "{args.output_csv}"')

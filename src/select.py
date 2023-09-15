@@ -41,10 +41,10 @@ def count(input_file):
     return samples, label_counts
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Select curated examples with the most different labels.')
+    parser = argparse.ArgumentParser(description='Analyze and select curated examples with the most different labels.')
     parser.add_argument('input_jsonl', help='Input JSONL file containing labeled examples.')
-    parser.add_argument('output_jsonl', help='Output JSONL file containing selected examples with only the "text" field.')
-    parser.add_argument('num_sample', type=int, help='Number of samples to select.')
+    parser.add_argument('--output_jsonl', help='Output JSONL file containing selected examples (optional).')
+    parser.add_argument('--num_sample', type=int, help='Number of samples to select (optional).')
     parser.add_argument('--text_only', action='store_true', help='Output only the "text" field (optional).')
 
     args = parser.parse_args()
@@ -53,14 +53,17 @@ if __name__ == '__main__':
     counted_samples, label_counts = count(args.input_jsonl)
     print(f"Found {len(counted_samples)} samples.")
 
-    # Print label counts in descending order by count
+    total_samples = len(counted_samples)
+    
+    # Print label counts in descending order by count with percentage
     print("Sample Counts & Label:")
     sorted_label_counts = sorted(label_counts.items(), key=lambda x: x[1], reverse=True)
     for label, count in sorted_label_counts:
-        print(f"{count} \t {label}")
+        percentage = (count / total_samples) * 100
+        print(f"{count} ({percentage:.2f}%) \t {label}")
 
-    # Print the count of texts with different label counts
-    print("\nDifferent Label Counts & Sample Counts")
+    # Print the count of texts with different label counts with percentage
+    print("\nDifferent Label Counts & Sample Counts:")
     count_texts = {}
     for sample in counted_samples:
         n = len(sample.get_labels())
@@ -68,21 +71,23 @@ if __name__ == '__main__':
 
     sorted_count_texts = sorted(count_texts.items(), key=lambda x: x[0], reverse=True)
     for diff_label_count, text_count in sorted_count_texts:
-        print(f"{diff_label_count} \t {text_count}")
+        percentage = (text_count / total_samples) * 100
+        print(f"{diff_label_count} ({percentage:.2f}%) \t {text_count}")
 
-    if args.num_sample <= len(counted_samples):
-        selected_samples = select(counted_samples, args.num_sample)
-        print(f"Selected {args.num_sample} samples based on label count.")
+    # Write the selected_samples as a JSONL file if an output file is provided
+    if args.output_jsonl:
+        if args.num_sample > len(counted_samples):
+            print(f"\nNumber of samples requested ({args.num_sample}) is greater than the available samples ({len(counted_samples)}).")
+        else:
+            selected_samples = select(counted_samples, args.num_sample)
+            print(f"\nSelected {args.num_sample} samples based on label count.")
 
-        # Write the selected_samples as a JSONL file
-        with open(args.output_jsonl, 'w') as output_file:
-            if args.text_only:
-                for sample in selected_samples:
-                    output_file.write(json.dumps({'text': sample.get_sample()['text']}) + '\n')
-            else:
-                for sample in selected_samples:
-                    output_file.write(json.dumps(sample.get_sample()) + '\n')
+            with open(args.output_jsonl, 'w') as output_file:
+                if args.text_only:
+                    for sample in selected_samples:
+                        output_file.write(json.dumps({'text': sample.get_sample()['text']}) + '\n')
+                else:
+                    for sample in selected_samples:
+                        output_file.write(json.dumps(sample.get_sample()) + '\n')
 
-        print(f"Saved selected samples to '{args.output_jsonl}'.")
-    else:
-        print(f"Number of samples requested ({args.num_sample}) is greater than the available samples ({len(counted_samples)}).")
+            print(f"Saved selected samples to '{args.output_jsonl}'.")
