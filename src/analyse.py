@@ -51,20 +51,20 @@ if __name__ == "__main__":
         writer.writeheader()
 
         if args.model_dir_path:
-            perf_default = {'p': 0.0, 'r': 0.0, 'f': 0.0}
+            perf_default = {'p': 0.00, 'r': 0.00, 'f': 0.00}
             writer.writerows({
                 'Label': label,
                 'Count': count,
-                'Frequency': calculate_percentage(count, total),
-                'Precision': round(performances.get(label, perf_default)['p'] * 100, 2),
-                'Recall': round(performances.get(label, perf_default)['r'] * 100, 2),
-                'F1Score': round(performances.get(label, perf_default)['f'] * 100, 2)
+                'Frequency': "%.2f" % round(calculate_percentage(count, total), 2),
+                'Precision': "%.2f" % round(performances.get(label, perf_default)['p'] * 100, 2),
+                'Recall': "%.2f" % round(performances.get(label, perf_default)['r'] * 100, 2),
+                'F1Score': "%.2f" % round(performances.get(label, perf_default)['f'] * 100, 2)
             } for label, count in counts_sorted)
         else:
             writer.writerows({
                 'Label': label,
                 'Count': count,
-                'Frequency': calculate_percentage(count, total),
+                'Frequency': "%.2f" % round(calculate_percentage(count, total), 2),
             } for label, count in counts_sorted)
 
     # Print total annotation count and the location of the saved statistics
