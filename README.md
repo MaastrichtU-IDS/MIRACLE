@@ -136,7 +136,7 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
     After correcting the model's suggestion, re-train the last-model and depending on the model's performance continue with correction and training.
 
     ```bash
-    prodigy train ./models/miracle/model-last --ner ner_indications --label-stats
+    prodigy train ./models/miracle --ner ner_indications --label-stats --base-model ./models/miracle/model-best
     ```
 
     You can use train-curve recipe to see whether more data improves the model or not. As a rule of thumb, if accuracy improves within the last 25%, training with more examples will likely result in better accuracy.
