@@ -289,6 +289,7 @@ if __name__ == "__main__":
 
     # Print the total number of rows
     print(f'Total number of rows extracted: {len(combined_rows)}')
+    print(f'Total number of annotations extracted: {total}')
 
     for label, count in counts:
         print("%s:\t%s" % (label, count))
