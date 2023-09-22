@@ -18,12 +18,12 @@ def calculate_ner_metrics(gold_standard_col, ner_annotations_col, similarity_thr
         label_list = list(ast.literal_eval(labels)) if labels.startswith('{') else [labels]
         pred_list = list(ast.literal_eval(preds)) if preds.startswith('{') else [preds]
 
-        ann_count += len(label_list)
+        if label_list[0] != 'nan':
+            ann_count += len(label_list)
 
         for label in label_list:
             found_match = False
             
-
             for pred in pred_list:
                 if is_similar(label, pred, similarity_threshold):
                     found_match = True
@@ -117,20 +117,21 @@ if __name__ == "__main__":
 
     # Create a DataFrame to store the results
     results_df = pd.DataFrame({
-        "Column": list(precision_dict.keys()),
+        "Label": list(precision_dict.keys()),
         "Count": list(ann_count_dict.values()),
         "Frequency": ["%.2f" % calculate_frequency(ann_count_dict[column], total_ann_count) for column in precision_dict],
-        "Precision": ["%.2f" % precision_dict[column] for column in precision_dict],
-        "Recall": ["%.2f" % recall_dict[column] for column in precision_dict],
-        "F1Score": ["%.2f" % f1_dict[column] for column in precision_dict]
+        "Precision": ["%.2f" % round(precision_dict[column] * 100, 2) for column in precision_dict],
+        "Recall": ["%.2f" % round(recall_dict[column] * 100, 2) for column in precision_dict],
+        "F1Score": ["%.2f" % round(f1_dict[column] * 100, 2) for column in precision_dict]
     })
 
     # Write the results to the output CSV file
+    results_df = results_df.sort_values(by="Count", ascending=False)
     results_df.to_csv(output_csv, index=False)
 
     print("NER metrics have been calculated and saved to", output_csv)
 
     # Print the overall performance
-    print("Overall Precision:", "%.2f" % overall_precision)
-    print("Overall Recall:", "%.2f" % overall_recall)
-    print("Overall F1 Score:", "%.2f" % overall_f1)
+    print("Overall Precision:", "%.2f" % round(overall_precision * 100, 2))
+    print("Overall Recall:", "%.2f" % round(overall_recall * 100, 2))
+    print("Overall F1 Score:", "%.2f" % round(overall_f1 * 100, 2))
