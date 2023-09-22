@@ -1,7 +1,6 @@
 import argparse
 import ast
 import pandas as pd
-from sklearn.metrics import precision_score, recall_score, f1_score
 from fuzzywuzzy import fuzz
 
 def is_similar(str1, str2, similarity_threshold):
@@ -12,14 +11,19 @@ def calculate_ner_metrics(gold_standard_col, ner_annotations_col, similarity_thr
     tp = 0
     fp = 0
     fn = 0
+    ann_count = 0 # Number of annotation(s) 
 
     # Iterate through each annotation in the gold standard
     for labels, preds in zip(gold_standard_col, ner_annotations_col):
         label_list = list(ast.literal_eval(labels)) if labels.startswith('{') else [labels]
         pred_list = list(ast.literal_eval(preds)) if preds.startswith('{') else [preds]
-        
+
+        ann_count += len(label_list)
+
         for label in label_list:
             found_match = False
+            
+
             for pred in pred_list:
                 if is_similar(label, pred, similarity_threshold):
                     found_match = True
@@ -32,7 +36,7 @@ def calculate_ner_metrics(gold_standard_col, ner_annotations_col, similarity_thr
     fp = len(ner_annotations_col) - tp
 
     # Calculate precision, recall, and F1 score (avoid division by zero)
-    positive_predictions = tp + fp 
+    positive_predictions = tp + fp
     positives_actuals = tp + fn
 
     # Precision measures how many of the positive predictions made are correct (true positives)
@@ -43,7 +47,7 @@ def calculate_ner_metrics(gold_standard_col, ner_annotations_col, similarity_thr
     # F1-Score is the harmonic mean of precision and recall
     f1 = 2 * (precision * recall) / sum_precision_recall if sum_precision_recall > 0 else 0
 
-    return precision, recall, f1
+    return precision, recall, f1, ann_count
 
 def compare_csv_columns(gold_csv, model_csv, similarity_threshold, exclude_columns=None):
     # Read CSV files into pandas DataFrames
@@ -59,20 +63,21 @@ def compare_csv_columns(gold_csv, model_csv, similarity_threshold, exclude_colum
     precision_dict = {}
     recall_dict = {}
     f1_dict = {}
+    ann_count_dict = {}
 
     # Iterate through columns in both DataFrames
     for column in gold_df.columns:
         gold_col = gold_df[column].astype(str)
         model_col = model_df[column].astype(str)
         # Calculate metrics for the current column
-        precision, recall, f1 = calculate_ner_metrics(gold_col, model_col, similarity_threshold)
+        precision, recall, f1, ann_count = calculate_ner_metrics(gold_col, model_col, similarity_threshold)
 
         # Store metrics in dictionaries
         precision_dict[column] = precision
         recall_dict[column] = recall
         f1_dict[column] = f1
-
-    return precision_dict, recall_dict, f1_dict
+        ann_count_dict[column] = ann_count
+    return precision_dict, recall_dict, f1_dict, ann_count_dict
 
 def calculate_overall_metrics(precision_dict, recall_dict, f1_dict):
     # Calculate overall metrics by taking weighted averages based on the number of columns
@@ -83,32 +88,49 @@ def calculate_overall_metrics(precision_dict, recall_dict, f1_dict):
 
     return overall_precision, overall_recall, overall_f1
 
+def calculate_frequency(count, total):
+    return round((count / total) * 100, 2)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compare two CSV files and calculate NER metrics.")
-    parser.add_argument("gold_csv", help="Path to the gold annotations CSV file")
-    parser.add_argument("model_csv", help="Path to the model annotations CSV file")
-    parser.add_argument("--threshold", type=int, default=60, help="Similarity threshold (default: 60)")
-    parser.add_argument("--exclude-columns", nargs="+", help="Columns to exclude during comparison")
+    parser.add_argument("gold_csv", help="Path to the CSV file containing gold standard annotations")
+    parser.add_argument("model_csv", help="Path to the CSV file containing model-generated annotations")
+    parser.add_argument("output_csv", help="Path to the output statistics CSV file")
+    parser.add_argument("--threshold", type=int, default=60, help="Similarity threshold for matching annotations (default: 60)")
+    parser.add_argument("--exclude_columns", nargs="+", help="List of columns to exclude during comparison")
 
     args = parser.parse_args()
 
     gold_csv = args.gold_csv
     model_csv = args.model_csv
+    output_csv = args.output_csv
     similarity_threshold = args.threshold
     exclude_columns = args.exclude_columns
 
-    precision_dict, recall_dict, f1_dict = compare_csv_columns(gold_csv, model_csv, similarity_threshold, exclude_columns)
+    print("Comparing CSV files and calculating NER metrics...")
+    
+    precision_dict, recall_dict, f1_dict, ann_count_dict = compare_csv_columns(gold_csv, model_csv, similarity_threshold, exclude_columns)
 
     overall_precision, overall_recall, overall_f1 = calculate_overall_metrics(precision_dict, recall_dict, f1_dict)
 
-    # Print the metrics for each column
-    for column in precision_dict:
-        print(f"Column: {column}")
-        print(f"Precision: {precision_dict[column]}")
-        print(f"Recall: {recall_dict[column]}")
-        print(f"F1 Score: {f1_dict[column]}\n")
+    total_ann_count = sum(ann_count_dict.values())
+
+    # Create a DataFrame to store the results
+    results_df = pd.DataFrame({
+        "Column": list(precision_dict.keys()),
+        "Count": list(ann_count_dict.values()),
+        "Frequency": ["%.2f" % calculate_frequency(ann_count_dict[column], total_ann_count) for column in precision_dict],
+        "Precision": ["%.2f" % precision_dict[column] for column in precision_dict],
+        "Recall": ["%.2f" % recall_dict[column] for column in precision_dict],
+        "F1Score": ["%.2f" % f1_dict[column] for column in precision_dict]
+    })
+
+    # Write the results to the output CSV file
+    results_df.to_csv(output_csv, index=False)
+
+    print("NER metrics have been calculated and saved to", output_csv)
 
     # Print the overall performance
-    print("Overall Precision:", overall_precision)
-    print("Overall Recall:", overall_recall)
-    print("Overall F1 Score:", overall_f1)
+    print("Overall Precision:", "%.2f" % overall_precision)
+    print("Overall Recall:", "%.2f" % overall_recall)
+    print("Overall F1 Score:", "%.2f" % overall_f1)
