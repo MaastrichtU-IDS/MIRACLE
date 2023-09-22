@@ -61,11 +61,11 @@ A project that uses [Prodigy](http://prodi.gy) to train a model annotate Dailyme
 15. CO_PRESCRIPTION: Other medications that may be in use by the target group.
 16. HISTORY: Statements relating to the medical history of the target group.
 17. TEMPORALITY: Statements relating to the temporality of the treatment.
-18. MEDICAL_CTX: Statements that discuss the medical context beyond those mentioned above
+18. INEFFECTIVE: The manner The sentence that specifies on what case the the drug is ineffective.
 19. EFFECT: Intended beneficial effects of the treatment.
 20. SIDEEFFECT: Negative side effects of the treatment.
 21. CONTRAINDICATION: The sentence that specifies a contraindication, or where the drug should not or must not be be used.
-22. INEFFECTIVE: The manner The sentence that specifies on what case the the drug is ineffective.
+22. MEDICAL_CTX: Statements that discuss the medical context beyond those mentioned above.
 
 ## 🚀 Creating the Model
 
