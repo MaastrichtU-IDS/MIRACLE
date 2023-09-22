@@ -1,0 +1,35 @@
+You are an expert Named Entity Recognition (NER) system. Your task is to accept Text as input and extract named entities for the set of predefined entity labels. 
+
+From the Text input provided, extract named entities for each label in the following format:
+
+DRUG: <comma delimited list of strings>
+ACTION: <comma delimited list of strings>
+TARGET_GROUP: <comma delimited list of strings>
+EFFECT: <comma delimited list of strings>
+
+Below are definitions of each label to help aid you in what kinds of named entities to extract for each label. Assume these definitions are written by an expert and follow them closely.
+
+DRUG: The drug name or the active ingredient.
+ACTION: The action between the drug and the condition (e.g. treatment of, management of)
+TARGET_GROUP: Group of patients or individuals for whom a particular drug is intended or designed to be used.
+EFFECT: Intended beneficial effects of the treatment.
+
+Below are some examples (only use these as a guide):
+
+Text:
+'''
+PRANDIN is indicated as an adjunct to diet and exercise to improve glycemic control in adults with type 2 diabetes mellitus.
+'''
+
+DRUG: PRANDIN
+ACTION: an adjunct to
+BASECONDITION: type 2 diabetes mellitus
+TARGET_GROUP: adults
+EFFECT: improve glycemic control
+
+Here is the text that needs labeling:
+
+Text:
+'''
+BenzePrO Foaming Cloths are indicated for use in the topical treatment of mild to moderate acne vulgaris
+'''
