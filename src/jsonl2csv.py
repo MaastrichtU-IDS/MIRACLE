@@ -2,29 +2,25 @@ import argparse
 import json
 import csv
 
-def extract(input_file, output_file):
+def extract(input_file, output_file, labels_file):
     print("Extracting texts...")
 
-    rows = []  
+    # Read labels from the labels file if provided
     labels = set()
+    if labels_file:
+        with open(labels_file, 'r') as labels_txt:
+            labels = set(line.strip() for line in labels_txt)
+
+    rows = []  
 
     with open(input_file, 'r') as jsonl_file:
         for line in jsonl_file:
             data = json.loads(line)
-            row = {}
-
-            row['text'] = data['text']
+            row = {'text': data['text']}
 
             for span in data.get('spans', []):
                 label = span['label']
-                if row.get(label, None) is None:
-                    row[label] = set()
-                    labels.add(label)
-                row[label].add(span['text'])
-
-            for key, value in row.items():
-                if len(value) == 1:
-                    row[key] = value.pop()
+                row.setdefault(label, set()).add(span['text'])
 
             rows.append(row)
 
@@ -50,7 +46,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Extract labels and text from a JSONL file and create a CSV file.')
     parser.add_argument('input_file', help='Input JSONL file containing annotated samples')
     parser.add_argument('output_file', help='Output CSV file')
+    parser.add_argument('--labels_file', help='Path for labels to make sure all the labels are present as columns in the output CSV file (Optional).')
 
     args = parser.parse_args()
 
-    extract(args.input_file, args.output_file)
+    extract(args.input_file, args.output_file, args.labels_file)
