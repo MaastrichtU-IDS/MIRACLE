@@ -75,35 +75,35 @@ def get_treatment_group(g_neuro_dkg, target_group, ns1, rdfs):
 
         for response in g_neuro_dkg.query(query):
             if response['hasAgeGroup']:
-                target_group['AGE_GROUP'].append(response['hasAgeGroup']) 
+                target_group['AGE_GROUP'].add(str(response['hasAgeGroup'])) 
             if response['hasMinAge']:
-                target_group['MIN_AGE'].append(response['hasMinAge']) 
+                target_group['MIN_AGE'].add(str(response['hasMinAge'])) 
             if response['responseStatus']:
-                target_group['RESPONSE_STATUS'].append(response['responseStatus']) 
+                target_group['RESPONSE_STATUS'].add(str(response['responseStatus'])) 
             if response['hasCurrentMedication']:
-                target_group['CURRENT_MEDICATION'].append(get_rdf_label(g_neuro_dkg, rdfs, response['hasCurrentMedication'])) 
+                target_group['CURRENT_MEDICATION'].add(str(get_rdf_label(g_neuro_dkg, rdfs, response['hasCurrentMedication']))) 
             if response['hasComorbidity']:
-                target_group['COMORBIDTY'].append(get_rdf_label(g_neuro_dkg, rdfs, response['hasComorbidity']))
+                target_group['COMORBIDTY'].add(str(get_rdf_label(g_neuro_dkg, rdfs, response['hasComorbidity'])))
             if response['treatmentDuration']:
-                target_group['TREATMENT_DURATION'].append(get_rdf_label(g_neuro_dkg, rdfs, response['treatmentDuration'])) 
+                target_group['TREATMENT_DURATION'].add(str(get_rdf_label(g_neuro_dkg, rdfs, response['treatmentDuration']))) 
             if response['hasSymptom']:
-                target_group['SYMPTOM'].append(get_rdf_label(g_neuro_dkg, rdfs, response['hasSymptom'])) 
+                target_group['SYMPTOM'].add(str(get_rdf_label(g_neuro_dkg, rdfs, response['hasSymptom']))) 
             if response['hasTherapy']:
-                target_group['THERAPY'].append(response['hasTherapy'])
+                target_group['THERAPY'].add(str(response['hasTherapy']))
 
     return target_group
 
 def get_target_group(g_neuro_dkg, target_group_urls, ns1, rdfs):
     target_group = {
-        'AGE_GROUP': [], 
-        'MIN_AGE': [], 
-        'TREATMENT_CODE': [], 
-        'SYMPTOM': [], 
-        'THERAPY': [], 
-        'CURRENT_MEDICATION': [], 
-        'TREATMENT_DURATION': [], 
-        'RESPONSE_STATUS': [], 
-        'COMORBIDTY': []
+        'AGE_GROUP': set(), 
+        'MIN_AGE': set(), 
+        'TREATMENT_CODE': set(), 
+        'SYMPTOM': set(), 
+        'THERAPY': set(), 
+        'CURRENT_MEDICATION': set(), 
+        'TREATMENT_DURATION': set(), 
+        'RESPONSE_STATUS': set(), 
+        'COMORBIDTY': set()
     }
     
     for url in target_group_urls:
@@ -129,29 +129,26 @@ def get_target_group(g_neuro_dkg, target_group_urls, ns1, rdfs):
 
         for response in g_neuro_dkg.query(query):
             if response['hasAgeGroup']:
-                target_group['AGE_GROUP'].append(response['hasAgeGroup']),
+                target_group['AGE_GROUP'].add(str(response['hasAgeGroup'])),
             if response['hasMinAge']:
-                target_group['MIN_AGE'].append(response['hasMinAge']),
+                target_group['MIN_AGE'].add(str(response['hasMinAge'])),
             if response['responseStatus']:
-                target_group['RESPONSE_STATUS'].append(response['responseStatus']),
+                target_group['RESPONSE_STATUS'].add(str(response['responseStatus'])),
             if response['hasCurrentMedication']:
-                target_group['CURRENT_MEDICATION'].append(get_rdf_label(g_neuro_dkg, rdfs, response['hasCurrentMedication'])),
+                target_group['CURRENT_MEDICATION'].add(str(get_rdf_label(g_neuro_dkg, rdfs, response['hasCurrentMedication']))),
             if response['hasComorbidity']:
-                target_group['COMORBIDTY'].append(get_rdf_label(g_neuro_dkg, rdfs, response['hasComorbidity'])),
+                target_group['COMORBIDTY'].add(str(get_rdf_label(g_neuro_dkg, rdfs, response['hasComorbidity']))),
             if response['treatmentDuration']:
-                target_group['TREATMENT_DURATION'].append(response['treatmentDuration']),
+                target_group['TREATMENT_DURATION'].add(str(response['treatmentDuration'])),
             if response['hasSymptom']:
-                target_group['SYMPTOM'].append(get_rdf_label(g_neuro_dkg, rdfs, response['hasSymptom'])),
+                target_group['SYMPTOM'].add(str(get_rdf_label(g_neuro_dkg, rdfs, response['hasSymptom']))),
             if response['hasTherapy']:
-                target_group['THERAPY'].append(get_rdf_label(g_neuro_dkg, rdfs, response['hasTherapy'])),
+                target_group['THERAPY'].add(str(get_rdf_label(g_neuro_dkg, rdfs, response['hasTherapy']))),
             if response['hasTreatment']:
-                target_group['TREATMENT_CODE'].append(response['hasTreatment']),
+                target_group['TREATMENT_CODE'].add(str(response['hasTreatment'])),
                 get_treatment_group(g_neuro_dkg, target_group, ns1, rdfs)
     
     return target_group
-
-def combine_rows(row):
-    pass
 
 def extract(g_neuro_dkg, g_indications, output_csv):
     nkgi_indications = Namespace("http://www.w3id.org/neurodkg/Instances/")
@@ -204,15 +201,12 @@ def extract(g_neuro_dkg, g_indications, output_csv):
         target_group.pop('TREATMENT_CODE')
         
         for key in target_group.keys():
-            if not target_group[key]:            
-                continue
-                
-            row[key] = set()
-            for value in target_group[key]:
-                row[key].add(str(value))
-
-            if len(row[key]) == 1:
-                row[key] = str(target_group[key][0])
+            ann_set = target_group[key] # Set of annotations
+            set_len = len(ann_set)
+            if set_len == 1:
+                row[key] = next(iter(ann_set))
+            elif set_len > 1:
+                row[key] = ann_set
 
         # Collect rows by 'text' value
         if indication_text not in text_to_row:
@@ -247,7 +241,76 @@ def extract(g_neuro_dkg, g_indications, output_csv):
     # Convert the text_to_row dictionary to a list of rows
     combined_rows = list(text_to_row.values())
 
-    with open(output_csv, mode='w', newline='') as csv_file:
+    counts = {
+        'DRUG': 0, 'DISEASE': 0, 'AGE_GROUP': 0, 'MIN_AGE': 0, 
+        'SYMPTOM': 0, 'THERAPY': 0, 'CURRENT_MEDICATION': 0,
+        'TREATMENT_DURATION': 0, 'RESPONSE_STATUS': 0, 'COMORBIDTY': 0
+    }
+
+    # Count the number of annotations
+    skipped_column = ['CONTEXT_NO', 'text']
+    for row in combined_rows:
+        for key, value in row.items():
+            if key in skipped_column:
+                continue
+            if isinstance(value, str):
+                counts[key] = counts.get(key, 0) + 1
+            else:
+                counts[key] = counts.get(key, 0) + len(value)
+
+    total = sum(counts.values())
+    # Sort the counts by value in descending order
+    sorted_counts = sorted(counts.items(), key=lambda item: item[1], reverse=True)
+
+    return combined_rows, sorted_counts, total
+    
+def load_rdf_graph(file_path):
+    g = Graph()
+    g.parse(file_path, format="turtle")
+    return g
+
+def calculate_frequency(count, total):
+    return round((count / total) * 100, 2)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Extract relations from NeuroDKG RDF files and generate a CSV output.")
+    parser.add_argument("neurodkg_file", help="Path to the NeuroDKG RDF file (neuro_dkg.ttl)")
+    parser.add_argument("context_label_file", help="Path to the context label RDF file (context_label.ttl)")
+    parser.add_argument("output_csv", help="Path to the output CSV file") 
+    parser.add_argument('--stats_csv', action='store_true', default=False, help='Output statistics in CSV format')
+    args = parser.parse_args()
+
+    print("Loading RDF files...")
+    g_neuro_dkg = load_rdf_graph(args.neurodkg_file)
+    g_indications = load_rdf_graph(args.context_label_file)
+
+    print("Extracting data and generating CSV...")
+    combined_rows, counts, total = extract(g_neuro_dkg, g_indications, args.output_csv)
+
+    # Print the total number of rows
+    print(f'Total number of rows extracted: {len(combined_rows)}')
+
+    for label, count in counts:
+        print("%s:\t%s" % (label, count))
+
+    ann_out_csv = args.output_csv
+
+    # Check if the CSV flag is provided and output statistics in CSV format
+    if args.stats_csv:
+        stats_filename = ann_out_csv.replace('.csv', '_stats.csv')
+        with open(stats_filename, mode='w', newline='') as csv_file:
+            fieldnames = ['Label', 'Count', 'Frequency']
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            writer.writeheader()
+            for label, count in counts:
+                writer.writerow({
+                    'Label': label, 
+                    'Count': count, 
+                    'Frequency': "%.2f" % calculate_frequency(count, total)
+                })
+        print("Statistics saved to", stats_filename)
+
+    with open(ann_out_csv, mode='w', newline='') as csv_file:
         fieldnames = [
             'CONTEXT_NO', 'DRUG', 'DISEASE', 'AGE_GROUP', 'MIN_AGE', 
             'SYMPTOM', 'THERAPY', 'CURRENT_MEDICATION',
@@ -257,23 +320,4 @@ def extract(g_neuro_dkg, g_indications, output_csv):
         writer.writeheader()
         writer.writerows(combined_rows)
 
-def load_rdf_graph(file_path):
-    g = Graph()
-    g.parse(file_path, format="turtle")
-    return g
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Extract relations from RDF files and generate a CSV output.")
-    parser.add_argument("neurodkg_file", help="Path to the neurodkg RDF file (neuro_dkg.ttl)")
-    parser.add_argument("context_label_file", help="Path to the context label RDF file (context_label.ttl)")
-    parser.add_argument("output_csv", help="Path to the output CSV file") 
-    args = parser.parse_args()
-
-    print("Loading RDF files...")
-    g_neuro_dkg = load_rdf_graph(args.neurodkg_file)
-    g_indications = load_rdf_graph(args.context_label_file)
-
-    print("Extracting data and generating CSV...")
-    extract(g_neuro_dkg, g_indications, args.output_csv)
-
-    print("CSV generation complete. Output saved to", args.output_csv)
+    print("CSV generation complete. Output saved to", ann_out_csv)

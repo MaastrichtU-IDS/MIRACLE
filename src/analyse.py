@@ -16,7 +16,7 @@ def process_db(input_file: str):
 
     return counts
 
-def calculate_percentage(count, total):
+def calculate_frequency(count, total):
     return round((count / total) * 100, 2)
 
 if __name__ == "__main__":
@@ -55,7 +55,7 @@ if __name__ == "__main__":
             writer.writerows({
                 'Label': label,
                 'Count': count,
-                'Frequency': "%.2f" % round(calculate_percentage(count, total), 2),
+                'Frequency': "%.2f" % calculate_frequency(count, total),
                 'Precision': "%.2f" % round(performances.get(label, perf_default)['p'] * 100, 2),
                 'Recall': "%.2f" % round(performances.get(label, perf_default)['r'] * 100, 2),
                 'F1Score': "%.2f" % round(performances.get(label, perf_default)['f'] * 100, 2)
@@ -64,7 +64,7 @@ if __name__ == "__main__":
             writer.writerows({
                 'Label': label,
                 'Count': count,
-                'Frequency': "%.2f" % round(calculate_percentage(count, total), 2),
+                'Frequency': "%.2f" % calculate_frequency(count, total),
             } for label, count in counts_sorted)
 
     # Print total annotation count and the location of the saved statistics
