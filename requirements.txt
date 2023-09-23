@@ -4,3 +4,4 @@ rdflib
 fuzzywuzzy
 python-Levenshtein
 pyyaml
+tqdm

@@ -20,7 +20,8 @@ dependencies = [
     "scikit-learn",
     "fuzzywuzzy",
     "python-Levenshtein",
-    "pyyaml"
+    "pyyaml",
+    "tqdm"
 ]
 
 [project.optional-dependencies]
