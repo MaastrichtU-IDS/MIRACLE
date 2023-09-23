@@ -10,20 +10,32 @@ class Stats:
         self.partly_catch= 0
         self.exactly_wrong = 0
 
-def zip_annotation(model_span, gold_span, case):
+def get_text(tokens, token_start, token_end):
+    texts = ""
+    token_list = tokens[token_start:token_end + 1]
+    for i, token in enumerate(token_list):
+        text = token["text"]
+        if token["ws"] == True and i != len(token_list) - 1:
+            texts += text + " " 
+        else:
+            texts += text 
+    return texts
+
+
+def zip_annotation(model_tokens, model_span, gold_tokens, gold_span, case):
     if model_span == None:
         model_ann = ""
         model_label = ""
     else:
-        model_ann = model_span['text']
-        model_label = model_span['label']
+        model_ann = get_text(model_tokens, model_span['token_start'], model_span['token_end'])
+        model_label = model_span['label'] 
     
     if gold_span == None:
         gold_ann = ""
         gold_label = ""
     else:
-        gold_ann = gold_span['text']
-        gold_label = gold_span['label']
+        gold_ann = get_text(gold_tokens, gold_span['token_start'], gold_span['token_end'])
+        gold_label = gold_span['label'] 
 
     return {
         'model_ann': model_ann,
@@ -37,10 +49,19 @@ def process_datasets(model_jsonl, gold_jsonl):
     diff = []
     stats = Stats()
     total_sample = 0
+    non_accepted_sample = 0
 
     # Open the two JSONL files for reading
     with open(model_jsonl, 'r') as file1, open(gold_jsonl, 'r') as file2:
         for line1, line2 in zip(file1, file2):
+
+            model_data = json.loads(line1)
+            gold_data = json.loads(line2)
+
+            # Only process the accepted samples
+            if gold_data['answer'] != 'accept':
+                non_accepted_sample += 1
+                continue
 
             total_sample += 1
             # There are 5 cases
@@ -51,9 +72,11 @@ def process_datasets(model_jsonl, gold_jsonl):
             # 5. exactly wrong 
 
             # Parse the JSON objects from the lines
-            model_spans = json.loads(line1)['spans']
-            gold_spans = json.loads(line2)['spans']
-             
+            model_spans = model_data['spans']
+            gold_spans = gold_data['spans']
+            model_tokens = model_data['tokens']
+            gold_tokens = gold_data['tokens']
+
             m_i = 0
             g_i = 0
             min_length = min(len(model_spans), len(gold_spans))
@@ -66,7 +89,7 @@ def process_datasets(model_jsonl, gold_jsonl):
 
                 if m_end < g_st: 
                     # Model has token(s) which are not included in the gold dataset
-                    diff.append(zip_annotation(model_spans[m_i], None, "exactly wrong"))
+                    diff.append(zip_annotation(model_tokens, model_spans[m_i], None, None, "exactly wrong"))
                     m_i += 1
                     stats.exactly_wrong += 1
 
@@ -74,7 +97,7 @@ def process_datasets(model_jsonl, gold_jsonl):
                     #     g_i += 1
                 elif g_end < m_st:
                     # Model misses token(s) in gold dataset (exact miss)
-                    diff.append(zip_annotation(None, gold_spans[g_i], "exact miss"))
+                    diff.append(zip_annotation(None, None, gold_tokens, gold_spans[g_i], "exact miss"))
                     g_i += 1
                     stats.exact_miss += 1
                     # if gold_spans[g_i]['token_start'] > m_end:
@@ -122,19 +145,19 @@ def process_datasets(model_jsonl, gold_jsonl):
                             g_i += 1
 
                     # Model catches the gold dataset
-                    diff.append(zip_annotation(model_spans[mi], gold_spans[gi], case))
+                    diff.append(zip_annotation(model_tokens, model_spans[mi], gold_tokens, gold_spans[gi], case))
 
 
             # Finish the remaining annotations if there are
             while m_i < len(model_spans):
                 # Process only model
-                diff.append(zip_annotation(model_spans[m_i], None, "exactly wrong"))
+                diff.append(zip_annotation(model_tokens, model_spans[m_i], None, None, "exactly wrong"))
                 m_i += 1
             while g_i < len(gold_spans):
-                diff.append(zip_annotation(None, gold_spans[g_i], "exact miss"))
+                diff.append(zip_annotation(None, None, gold_tokens, gold_spans[g_i], "exact miss"))
                 g_i += 1
 
-    return diff, stats, total_sample
+    return diff, stats, total_sample, non_accepted_sample
 
 
 if __name__ == '__main__':
@@ -146,7 +169,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    diff, stats, total_sample = process_datasets(args.model_jsonl, args.gold_jsonl)
+    diff, stats, total_sample, non_accepted_sample = process_datasets(args.model_jsonl, args.gold_jsonl)
 
     # Print the results in csv file
     with open(args.output_csv, 'w', newline='') as csvfile:
@@ -163,7 +186,7 @@ if __name__ == '__main__':
 
     # Print the summary of the comparison
     print(f"Comparison complete. Details written to '{args.output_csv}'")
-    print(f"Comparison Summary from {total_sample} example:")
+    print(f"Comparison Summary from {total_sample} example ({non_accepted_sample} of them non accepted):")
     print(f"Exact Miss: {stats.exact_miss}")
     print(f"Exact Catch: {stats.exact_catch}")
     print(f"Exact Catch but Wrong Label: {stats.exact_catch_wrong_label}")
