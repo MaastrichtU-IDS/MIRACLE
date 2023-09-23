@@ -11,9 +11,9 @@ def get_text(tokens, token_start, token_end):
             texts += text + " " 
         else:
             texts += text 
-        
-
     return texts
+
+
 def jsonl_to_yaml(input_file, output_file):
     samples = []
 
