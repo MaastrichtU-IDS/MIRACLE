@@ -87,7 +87,7 @@ if __name__ == "__main__":
     f1_score = results['ents_f'] * 100
     print(f"Precision: \t{precision:.2f}")
     print(f"Recall: \t{recall:.2f}")
-    print(f"F1 Score: \t{f1_score:.2f}")
+    print(f"F-measure: \t{f1_score:.2f}")
 
     # Print per-label evaluation results into a CSV file with two-digit precision
     per_label_scores = results['ents_per_type']
