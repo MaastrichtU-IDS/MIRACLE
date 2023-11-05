@@ -3,7 +3,7 @@ import json
 import csv
 import argparse
 
-def process_db(input_file: str):
+def process_db(input_file):
     counts = {}  # Dictionary to store label counts
 
     with open(input_file, 'r') as jsonl_file:
@@ -20,53 +20,78 @@ def calculate_frequency(count, total):
     return round((count / total) * 100, 2)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate label distribution statistics.")
-    parser.add_argument("training_dataset", help="Path to the training dataset in JSONL format")
+    parser = argparse.ArgumentParser(description="Generate label distribution statistics for a dataset, optionally with an evaluation dataset and model performance metrics.")
+    parser.add_argument("training_dataset", help="Path to the dataset (either the whole dataset or the training dataset) in JSONL format")
     parser.add_argument("output_csv", help="Path to the output CSV file to save statistics")
-    parser.add_argument("--model_dir_path", help="Path to the model directory containing meta.json")
+    parser.add_argument("--eval_dataset", help="Path to the optional evaluation dataset in JSONL format")
+    parser.add_argument("--model", help="Path to the optional model directory containing meta.json")
 
     args = parser.parse_args()
 
     # Load model performance data
-    if args.model_dir_path:
-        model_path = os.path.join(args.model_dir_path, "meta.json")
+    if args.model:
+        model_path = os.path.join(args.model, "meta.json")
         with open(model_path) as file:
             performances = json.load(file)['performance']['ents_per_type']
 
     # Process the training dataset
-    counts = process_db(args.training_dataset)
-    total = sum(counts.values())
+    train_counts = process_db(args.training_dataset)
+    total_train = sum(train_counts.values())
+
+    # Process the evaluation dataset
+    if args.eval_dataset:
+        eval_counts = process_db(args.eval_dataset)
+        total_eval = sum(eval_counts.values())
+    else:
+        eval_counts = {}
+        total_eval = 0
 
     # Sort label counts in descending order
-    counts_sorted = sorted(counts.items(), key=lambda item: item[1], reverse=True)
+    train_counts_sorted = sorted(train_counts.items(), key=lambda item: item[1], reverse=True)
+    eval_counts_sorted = sorted(eval_counts.items(), key=lambda item: item[1], reverse=True)
 
     # Write statistics to the output CSV file
     with open(args.output_csv, 'w', newline='') as csvfile:
-        if args.model_dir_path:
-            headers = ['Label', 'Count', 'Frequency', 'Precision', 'Recall', 'F1Score']
-        else:
-            headers =  ['Label', 'Count', 'Frequency']
+        headers = ['Label']
+        
+        if args.eval_dataset:
+            headers.extend(['Total Count', 'Total Frequency', 'Count Train', 'Count Eval'])
+        else:    
+            headers.extend(['Count', 'Frequency'])
+        
+        if args.model:
+            headers.extend(['Precision', 'Recall', 'F-measure'])
         
         writer = csv.DictWriter(csvfile, headers)
         writer.writeheader()
 
-        if args.model_dir_path:
-            perf_default = {'p': 0.00, 'r': 0.00, 'f': 0.00}
-            writer.writerows({
-                'Label': label,
-                'Count': count,
-                'Frequency': "%.2f" % calculate_frequency(count, total),
-                'Precision': "%.2f" % round(performances.get(label, perf_default)['p'] * 100, 2),
-                'Recall': "%.2f" % round(performances.get(label, perf_default)['r'] * 100, 2),
-                'F1Score': "%.2f" % round(performances.get(label, perf_default)['f'] * 100, 2)
-            } for label, count in counts_sorted)
-        else:
-            writer.writerows({
-                'Label': label,
-                'Count': count,
-                'Frequency': "%.2f" % calculate_frequency(count, total),
-            } for label, count in counts_sorted)
+        perf_default = {'p': 0.00, 'r': 0.00, 'f': 0.00}
+        
+        for label, count in train_counts_sorted:
+            row = {
+                'Label': label
+            }
+            
+            if args.eval_dataset:
+                row['Total Count'] = count + eval_counts.get(label, 0)
+                row['Total Frequency'] = "%.2f" % calculate_frequency(count + eval_counts.get(label, 0), total_train + total_eval)
+                row['Count Train'] = count
+                row['Count Eval'] = eval_counts.get(label, 0)
+            else:            
+                row['Count'] = count + eval_counts.get(label, 0)
+                row['Frequency'] = "%.2f" % calculate_frequency(count, total_train)
 
+            if args.model:
+                row['Precision'] = "%.2f" % round(performances.get(label, perf_default)['p'] * 100, 2)
+                row['Recall'] = "%.2f" % round(performances.get(label, perf_default)['r'] * 100, 2)
+                row['F-measure'] = "%.2f" % round(performances.get(label, perf_default)['f'] * 100, 2)
+            
+            writer.writerow(row)
+    
     # Print total annotation count and the location of the saved statistics
-    print(f'Total # annotations: {total}')
+    if args.eval_dataset:
+        print(f'Total number of annotations in the training dataset: {total_train}')
+        print(f'Total number of annotations in the evaluation dataset: {total_eval}')
+    else:
+        print(f'Total number of annotations in the dataset: {total_train}')
     print(f'Statistics saved in "{args.output_csv}"')
